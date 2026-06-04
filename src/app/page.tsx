@@ -306,6 +306,68 @@ export default function Home() {
     });
   };
 
+  const compressImage = (file: File, maxWidth = 1024, maxHeight = 1024, quality = 0.7): Promise<File> => {
+    return new Promise((resolve) => {
+      if (!file.type.startsWith('image/')) {
+        resolve(file);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(file);
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                resolve(file);
+                return;
+              }
+              const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            },
+            'image/jpeg',
+            quality
+          );
+        };
+        img.onerror = () => resolve(file);
+      };
+      reader.onerror = () => resolve(file);
+    });
+  };
+
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -322,10 +384,22 @@ export default function Home() {
       formData.append("workout_split", selectedSplit || "Fullbody");
       formData.append("program_name", programs[selectedProgramKey].title);
 
-      if (photoFront) formData.append("photo_front", photoFront);
-      if (photoBack) formData.append("photo_back", photoBack);
-      if (photoSide) formData.append("photo_side", photoSide);
-      if (paymentScreenshot) formData.append("payment_screenshot", paymentScreenshot);
+      if (photoFront) {
+        const compressed = await compressImage(photoFront);
+        formData.append("photo_front", compressed);
+      }
+      if (photoBack) {
+        const compressed = await compressImage(photoBack);
+        formData.append("photo_back", compressed);
+      }
+      if (photoSide) {
+        const compressed = await compressImage(photoSide);
+        formData.append("photo_side", compressed);
+      }
+      if (paymentScreenshot) {
+        const compressed = await compressImage(paymentScreenshot);
+        formData.append("payment_screenshot", compressed);
+      }
 
       const response = await fetch("/api/save-registration", {
         method: "POST",
