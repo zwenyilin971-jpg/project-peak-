@@ -59,7 +59,14 @@ export default function AdminDashboardClient({
                         (Age: {reg.age} | Height: {reg.height} | Weight: {reg.weight} lbs)
                       </span>
                     </h4>
-                    <span className="admin-badge admin-badge-reviewed">{reg.workout_split}</span>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      {reg.program_name && (
+                        <span className="admin-badge" style={{ background: 'rgba(14,165,233,0.15)', color: '#38bdf8', border: '1px solid rgba(14,165,233,0.3)' }}>
+                          <i className="ph ph-barbell" style={{ marginRight: '0.3rem' }}></i>{reg.program_name}
+                        </span>
+                      )}
+                      <span className="admin-badge admin-badge-reviewed">{reg.workout_split}</span>
+                    </div>
                   </div>
                   
                   <div className="admin-reg-grid">
@@ -75,22 +82,22 @@ export default function AdminDashboardClient({
 
                   <div className="admin-photo-links">
                     {reg.photo_front && (
-                      <a href={`/${reg.photo_front}`} target="_blank" rel="noopener noreferrer" className="admin-btn admin-btn-secondary">
+                      <a href={reg.photo_front.startsWith('http') ? reg.photo_front : `/${reg.photo_front}`} target="_blank" rel="noopener noreferrer" className="admin-btn admin-btn-secondary">
                         <i className="ph ph-image"></i> ရှေ့ပိုင်း
                       </a>
                     )}
                     {reg.photo_back && (
-                      <a href={`/${reg.photo_back}`} target="_blank" rel="noopener noreferrer" className="admin-btn admin-btn-secondary">
+                      <a href={reg.photo_back.startsWith('http') ? reg.photo_back : `/${reg.photo_back}`} target="_blank" rel="noopener noreferrer" className="admin-btn admin-btn-secondary">
                         <i className="ph ph-image"></i> နောက်ပိုင်း
                       </a>
                     )}
                     {reg.photo_side && (
-                      <a href={`/${reg.photo_side}`} target="_blank" rel="noopener noreferrer" className="admin-btn admin-btn-secondary">
+                      <a href={reg.photo_side.startsWith('http') ? reg.photo_side : `/${reg.photo_side}`} target="_blank" rel="noopener noreferrer" className="admin-btn admin-btn-secondary">
                         <i className="ph ph-image"></i> ဘေးပိုင်း
                       </a>
                     )}
                     {reg.payment_screenshot && (
-                      <a href={`/${reg.payment_screenshot}`} target="_blank" rel="noopener noreferrer" className="admin-btn admin-btn-success">
+                      <a href={reg.payment_screenshot.startsWith('http') ? reg.payment_screenshot : `/${reg.payment_screenshot}`} target="_blank" rel="noopener noreferrer" className="admin-btn admin-btn-success">
                         <i className="ph ph-receipt"></i> ပြေစာ
                       </a>
                     )}
